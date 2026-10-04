@@ -4,6 +4,8 @@ A native macOS terminal that drops down when you push the pointer to the top cen
 
 **[Download](https://github.com/jeromegsq-dev/QuickTerm/releases/latest/download/QuickTerm.dmg)** · [Website](https://jeromegsq-dev.github.io/QuickTerm/) · macOS 14 or later, Apple silicon and Intel
 
+The app is signed but not notarized. On first launch macOS blocks it: open **System Settings › Privacy & Security** and click **Open Anyway**.
+
 ## Use
 
 | | |
@@ -22,7 +24,7 @@ Requires Xcode 16 or later.
 
 ```sh
 ./Scripts/build-app.sh   # build/QuickTerm.app, ad-hoc signed
-./Scripts/release.sh     # signed and notarized build/QuickTerm.dmg
+./Scripts/release.sh     # build/QuickTerm.dmg, signed with a Developer ID
 ```
 
 Terminal emulation by [SwiftTerm](https://github.com/migueldeicaza/SwiftTerm).
