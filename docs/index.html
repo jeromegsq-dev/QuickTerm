@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QuickTerm — Your terminal, one push away</title>
+<meta name="description" content="A native macOS terminal that drops down when you push the pointer to the top of your screen.">
+<meta property="og:title" content="QuickTerm">
+<meta property="og:description" content="Your terminal, one push away. Native, for macOS.">
+<meta property="og:image" content="https://jeromegsq-dev.github.io/QuickTerm/icon.png">
+<meta property="og:url" content="https://jeromegsq-dev.github.io/QuickTerm/">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root {
+  --text: #f5f5f7;
+  --muted: #86868b;
+  --tile: #161617;
+  --blue: #0071e3;
+  --link: #2997ff;
+}
+* { box-sizing: border-box; margin: 0; }
+html { background: #000; color: var(--text); -webkit-font-smoothing: antialiased; }
+body { font: 17px/1.47 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+nav {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(0, 0, 0, .72);
+  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+nav > div { max-width: 1024px; margin: 0 auto; padding: 0 22px; height: 52px; display: flex; align-items: center; gap: 24px; }
+.brand { display: flex; align-items: center; gap: 8px; color: var(--text); font-weight: 600; font-size: 19px; letter-spacing: -.01em; margin-right: auto; }
+.brand:hover { text-decoration: none; }
+.brand img { width: 28px; height: 28px; }
+nav a.plain { color: var(--text); font-size: 13px; opacity: .8; }
+nav a.plain:hover { opacity: 1; text-decoration: none; }
+
+.button {
+  display: inline-block; background: var(--blue); color: #fff;
+  border-radius: 980px; padding: 12px 24px; font-size: 17px;
+  transition: background .2s;
+}
+.button:hover { background: #0077ed; text-decoration: none; }
+.button.small { padding: 5px 13px; font-size: 13px; }
+
+section { max-width: 1024px; margin: 0 auto; padding: 0 22px; }
+.hero { text-align: center; padding-top: 96px; }
+h1 { font-size: clamp(44px, 8.4vw, 92px); line-height: 1.04; font-weight: 600; letter-spacing: -.035em; }
+.lead { font-size: clamp(19px, 2.4vw, 26px); line-height: 1.3; color: var(--muted); max-width: 620px; margin: 22px auto 0; font-weight: 500; letter-spacing: -.01em; }
+.cta { margin-top: 34px; display: flex; justify-content: center; align-items: center; gap: 28px; flex-wrap: wrap; }
+.note { margin-top: 18px; font-size: 13px; color: var(--muted); }
+
+/* Demo */
+.demo { margin-top: 72px; }
+.screen {
+  container-type: inline-size;
+  position: relative; aspect-ratio: 16 / 10; overflow: hidden;
+  border-radius: 22px; border: 1px solid rgba(255, 255, 255, .12);
+  background:
+    radial-gradient(120% 90% at 20% 110%, #f0a56c 0%, transparent 55%),
+    radial-gradient(100% 100% at 90% 0%, #6b5bd6 0%, transparent 60%),
+    linear-gradient(160deg, #1b2a6b, #0d1b3d 60%, #2a1a4a);
+}
+.menubar { position: absolute; inset: 0 0 auto 0; height: 4.2cqw; background: rgba(10, 12, 24, .35); }
+.notch { position: absolute; top: 0; left: 50%; width: 14cqw; height: 4.2cqw; transform: translateX(-50%); background: #000; border-radius: 0 0 1.2cqw 1.2cqw; }
+.drop { position: absolute; top: 4.2cqw; left: 19%; width: 62%; height: 52%; overflow: hidden; }
+.panel {
+  height: 100%; padding: 1.2cqw 1.6cqw;
+  background: rgba(11, 12, 16, .74);
+  -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, .1); border-top: 0;
+  border-radius: 0 0 1.8cqw 1.8cqw;
+  font: 500 1.55cqw/1.7 "SF Mono", ui-monospace, Menlo, monospace; text-align: left; color: #e9e9ee;
+  animation: drop 10s infinite;
+}
+.tabs { display: flex; align-items: center; gap: 1cqw; margin-bottom: 1cqw; font: 500 1.3cqw/1 -apple-system, sans-serif; color: var(--muted); }
+.tabs span { background: rgba(255, 255, 255, .14); color: var(--text); padding: .7cqw 5cqw .7cqw 1.2cqw; border-radius: .8cqw; }
+.panel p { opacity: 0; animation: 10s infinite; }
+.panel p:nth-of-type(1) { animation-name: line1; }
+.panel p:nth-of-type(2) { animation-name: line2; }
+.panel p:nth-of-type(3) { animation-name: line3; }
+.panel p:nth-of-type(4) { animation-name: line4; }
+.panel b { color: #32d74b; font-weight: 600; }
+.panel i { color: var(--muted); font-style: normal; }
+.caret { display: inline-block; width: .9cqw; height: 1.7cqw; background: #32d74b; vertical-align: -.25cqw; animation: blink 1s steps(1) infinite; }
+.pointer { position: absolute; width: 2.2cqw; left: 62%; top: 62%; animation: pointer 10s infinite; filter: drop-shadow(0 .2cqw .3cqw rgba(0, 0, 0, .5)); }
+
+@keyframes drop {
+  0%, 14% { transform: translateY(-101%); animation-timing-function: cubic-bezier(.2, .9, .25, 1); }
+  20%, 84% { transform: translateY(0); animation-timing-function: cubic-bezier(.5, 0, .9, .5); }
+  88%, 100% { transform: translateY(-101%); }
+}
+@keyframes pointer {
+  0% { left: 62%; top: 62%; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+  14%, 18% { left: 50%; top: 0; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+  30%, 74% { left: 58%; top: 40%; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+  84%, 88% { left: 50%; top: 0; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+  100% { left: 62%; top: 62%; }
+}
+@keyframes line1 { 0%, 26% { opacity: 0; } 27%, 100% { opacity: 1; } }
+@keyframes line2 { 0%, 36% { opacity: 0; } 37%, 100% { opacity: 1; } }
+@keyframes line3 { 0%, 46% { opacity: 0; } 47%, 100% { opacity: 1; } }
+@keyframes line4 { 0%, 60% { opacity: 0; } 61%, 100% { opacity: 1; } }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .panel, .panel p, .pointer, .caret { animation: none; opacity: 1; }
+}
+
+/* Features */
+.features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 120px; }
+.tile { background: var(--tile); border-radius: 28px; padding: 44px 40px; }
+.tile h2 { font-size: 32px; line-height: 1.12; font-weight: 600; letter-spacing: -.02em; }
+.tile p { margin-top: 10px; font-size: 19px; color: var(--muted); font-weight: 500; }
+kbd { font: inherit; color: var(--text); }
+@media (max-width: 700px) {
+  .features { grid-template-columns: 1fr; margin-top: 80px; }
+  .hero { padding-top: 64px; }
+  nav a.plain { display: none; }
+}
+
+.closing { text-align: center; padding-top: 140px; padding-bottom: 120px; }
+.closing img { width: 128px; height: 128px; }
+.closing h2 { font-size: clamp(36px, 6vw, 60px); font-weight: 600; letter-spacing: -.03em; margin: 12px 0 30px; }
+
+footer { border-top: 1px solid rgba(255, 255, 255, .1); }
+footer div { max-width: 1024px; margin: 0 auto; padding: 22px; font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav><div>
+  <a class="brand" href="#"><img src="icon.png" alt="">QuickTerm</a>
+  <a class="plain" href="https://github.com/jeromegsq-dev/QuickTerm">GitHub</a>
+  <a class="button small" href="https://github.com/jeromegsq-dev/QuickTerm/releases/latest/download/QuickTerm.dmg">Download</a>
+</div></nav>
+
+<section class="hero">
+  <h1>Your terminal.<br>One push away.</h1>
+  <p class="lead">Push the pointer to the top of your screen. A terminal drops down.</p>
+  <div class="cta">
+    <a class="button" href="https://github.com/jeromegsq-dev/QuickTerm/releases/latest/download/QuickTerm.dmg">Download for macOS</a>
+    <a href="https://github.com/jeromegsq-dev/QuickTerm">View on GitHub ›</a>
+  </div>
+  <p class="note">Free · macOS 14 or later · Apple silicon and Intel</p>
+
+  <div class="demo">
+    <div class="screen" role="img" aria-label="The pointer touches the top of the screen and a terminal slides down.">
+      <div class="menubar"></div>
+      <div class="notch"></div>
+      <div class="drop"><div class="panel">
+        <div class="tabs"><span>~</span>+</div>
+        <p><b>❯</b> git status</p>
+        <p><i>On branch main. Nothing to commit.</i></p>
+        <p><b>❯</b> swift build</p>
+        <p><i>Build complete! (2.1s)</i><br><b>❯</b> <span class="caret"></span></p>
+      </div></div>
+      <svg class="pointer" viewBox="0 0 20 28"><path d="M2 2v20l5.2-4.6 3.4 8 3.2-1.4-3.4-7.8H17z" fill="#000" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="tile"><h2>Native.</h2><p>AppKit, Core Animation, Metal. No Electron.</p></div>
+  <div class="tile"><h2>Tabs.</h2><p><kbd>⌘T</kbd> opens one. <kbd>⌘1</kbd>–<kbd>9</kbd> switch.</p></div>
+  <div class="tile"><h2>Gone when you’re done.</h2><p><kbd>Esc</kbd>, or push the top again.</p></div>
+  <div class="tile"><h2>Yours to size.</h2><p>Drag any edge. It remembers.</p></div>
+</section>
+
+<section class="closing">
+  <img src="icon.png" alt="QuickTerm icon">
+  <h2>Get QuickTerm.</h2>
+  <a class="button" href="https://github.com/jeromegsq-dev/QuickTerm/releases/latest/download/QuickTerm.dmg">Download for macOS</a>
+</section>
+
+<footer><div>
+  <span>© 2026 QuickTerm · MIT License</span>
+  <a href="https://github.com/jeromegsq-dev/QuickTerm">Source on GitHub</a>
+</div></footer>
+
+</body>
+</html>
