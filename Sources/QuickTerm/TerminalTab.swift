@@ -5,8 +5,12 @@ import SwiftTerm
 /// One shell session and its terminal view.
 final class TerminalTab {
     let view = LocalProcessTerminalView(frame: .zero)
+    /// The view only holds its delegate weakly.
+    private let outputGuard: TerminalGuard
 
     init(delegate: LocalProcessTerminalViewDelegate, directory: String) {
+        outputGuard = TerminalGuard(view: view)
+        view.terminalDelegate = outputGuard
         view.processDelegate = delegate
         view.autoresizingMask = [.width, .height]
         view.font = .monospacedSystemFont(ofSize: 13, weight: .regular)

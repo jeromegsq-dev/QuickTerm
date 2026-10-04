@@ -11,7 +11,8 @@ APP="build/QuickTerm.app"
 # build plugin in a single multi-arch invocation.
 BINARIES=()
 for ARCH in arm64 x86_64; do
-    swift build -c release --arch "$ARCH"
+    # Keep this machine's absolute paths out of the binary.
+    swift build -c release --arch "$ARCH" -Xswiftc -file-prefix-map -Xswiftc "$PWD=."
     BIN="$(swift build -c release --arch "$ARCH" --show-bin-path)"
     BINARIES+=("$BIN/QuickTerm")
 done
@@ -19,6 +20,7 @@ done
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 lipo -create "${BINARIES[@]}" -output "$APP/Contents/MacOS/QuickTerm"
+strip -x "$APP/Contents/MacOS/QuickTerm"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 # SwiftPM resource bundles (SwiftTerm's Metal shaders).
